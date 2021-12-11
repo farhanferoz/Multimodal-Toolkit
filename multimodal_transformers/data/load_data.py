@@ -1,7 +1,8 @@
 from functools import partial
 import logging
 from os.path import join, exists
-
+from typing import List
+from copy import deepcopy
 import pandas as pd
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer
@@ -244,6 +245,7 @@ def load_train_val_test_helper(train_df,
 
         categorical_encode_type = None
 
+    numerical_transformer = None
     if numerical_transformer_method != 'none':
         if numerical_transformer_method == 'yeo_johnson':
             numerical_transformer = PowerTransformer(method='yeo-johnson')
@@ -255,61 +257,74 @@ def load_train_val_test_helper(train_df,
             raise ValueError(f'preprocessing transformer method '
                              f'{numerical_transformer_method} not implemented')
         num_feats = load_num_feats(train_df, convert_to_func(numerical_cols))
-        numerical_transformer.fit(num_feats)
-    else:
-        numerical_transformer = None
+        if num_feats is not None:
+            numerical_transformer.fit(num_feats)
 
-    train_dataset = load_data(train_df,
-                              text_cols,
-                              tokenizer,
-                              label_col,
-                              label_list,
-                              categorical_cols,
-                              numerical_cols,
-                              sep_text_token_str,
-                              categorical_encode_type,
-                              numerical_transformer,
-                              empty_text_values,
-                              replace_empty_text,
-                              max_token_length,
-                              debug
-                              )
-    test_dataset = load_data(test_df,
-                             text_cols,
-                             tokenizer,
-                             label_col,
-                             label_list,
-                             categorical_cols,
-                             numerical_cols,
-                             sep_text_token_str,
-                             categorical_encode_type,
-                             numerical_transformer,
-                             empty_text_values,
-                             replace_empty_text,
-                             max_token_length,
-                             debug
-                             )
-
+    df = pd.concat([train_df, test_df])
     if val_df is not None:
-        val_dataset = load_data(val_df,
-                                text_cols,
-                                tokenizer,
-                                label_col,
-                                label_list,
-                                categorical_cols,
-                                numerical_cols,
-                                sep_text_token_str,
-                                categorical_encode_type,
-                                numerical_transformer,
-                                empty_text_values,
-                                replace_empty_text,
-                                max_token_length,
-                                debug
-                                )
+        df = pd.concat([df, val_df])
+        len_val = len(val_df)
     else:
-        val_dataset = None
+        len_val = 0
 
+    dataset = load_data(df,
+                        text_cols,
+                        tokenizer,
+                        label_col,
+                        label_list,
+                        categorical_cols,
+                        numerical_cols,
+                        sep_text_token_str,
+                        categorical_encode_type,
+                        numerical_transformer,
+                        empty_text_values,
+                        replace_empty_text,
+                        max_token_length,debug
+                        )
+    split_points = [len(train_df)]
+    for n in (len(test_df), len_val):
+        split_points.append(split_points[-1] + n)
+    [train_dataset, test_dataset, val_dataset] = split_dataset(dataset, split_points)
     return train_dataset, val_dataset, test_dataset
+
+
+def split_dataset(dataset: TorchTabularTextDataset, split_points: List[int]) -> List[TorchTabularTextDataset]:
+    dataset_list = []
+    start = 0
+    for i in range(len(split_points)):
+        end = split_points[i]
+        if start == end:
+            new_dataset = None
+        else:
+            df = dataset.df[start: end]
+
+            encodings = deepcopy(dataset.encodings)
+            encodings.data["input_ids"] = encodings.data["input_ids"][start: end]
+            encodings.data["token_type_ids"] = encodings.data["token_type_ids"][start: end]
+            encodings.data["attention_mask"] = encodings.data["attention_mask"][start: end]
+
+            cat_feats = dataset.cat_feats[start: end, :]
+
+            numerical_feats = None if dataset.numerical_feats is None else dataset.numerical_feats[start: end, :]
+
+            class_weights = dataset.class_weights
+
+            labels_list = dataset.label_list
+
+            labels = dataset.labels[start: end]
+
+            new_dataset = TorchTabularTextDataset(
+                encodings=encodings,
+                categorical_feats=cat_feats,
+                numerical_feats=numerical_feats,
+                labels=labels,
+                df=df,
+                label_list=labels_list,
+                class_weights=class_weights
+            )
+        dataset_list.append(new_dataset)
+        start = end
+    return dataset_list
 
 
 def load_data(data_df,
