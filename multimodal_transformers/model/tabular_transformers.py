@@ -7,14 +7,14 @@ from transformers import (
     XLNetForSequenceClassification,
     XLMForSequenceClassification
 )
-from transformers.modeling_bert import BERT_INPUTS_DOCSTRING
-from transformers.modeling_roberta import ROBERTA_INPUTS_DOCSTRING
-from transformers.modeling_distilbert import DISTILBERT_INPUTS_DOCSTRING
-from transformers.modeling_albert import ALBERT_INPUTS_DOCSTRING
-from transformers.modeling_xlnet import XLNET_INPUTS_DOCSTRING
-from transformers.modeling_xlm import XLM_INPUTS_DOCSTRING
-from transformers.configuration_xlm_roberta import XLMRobertaConfig
-from transformers.file_utils import add_start_docstrings_to_callable
+from transformers.models.bert.modeling_bert import BERT_INPUTS_DOCSTRING
+from transformers.models.roberta.modeling_roberta import ROBERTA_INPUTS_DOCSTRING
+from transformers.models.distilbert.modeling_distilbert import DISTILBERT_INPUTS_DOCSTRING
+from transformers.models.albert.modeling_albert import ALBERT_INPUTS_DOCSTRING
+from transformers.models.xlnet.modeling_xlnet import XLNET_INPUTS_DOCSTRING
+from transformers.models.xlm.modeling_xlm import XLM_INPUTS_DOCSTRING
+from transformers.models.xlm_roberta.configuration_xlm_roberta import XLMRobertaConfig
+from transformers.file_utils import add_start_docstrings_to_model_forward
 
 from .tabular_combiner import TabularFeatCombiner
 from .tabular_config import TabularConfig
@@ -61,21 +61,21 @@ class BertWithTabular(BertForSequenceClassification):
                                           hidden_channels=dims,
                                           bn=True)
 
-    @add_start_docstrings_to_callable(BERT_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
+    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        class_weights=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        cat_feats=None,
-        numerical_feats=None
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            class_weights=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            cat_feats=None,
+            numerical_feats=None
     ):
         r"""
         class_weights (:obj:`torch.FloatTensor` of shape :obj:`(tabular_config.num_labels,)`, `optional`, defaults to :obj:`None`):
@@ -162,21 +162,21 @@ class RobertaWithTabular(RobertaForSequenceClassification):
                                           hidden_channels=dims,
                                           bn=True)
 
-    @add_start_docstrings_to_callable(ROBERTA_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
+    @add_start_docstrings_to_model_forward(ROBERTA_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        class_weights=None,
-        cat_feats=None,
-        numerical_feats=None
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            class_weights=None,
+            cat_feats=None,
+            numerical_feats=None
     ):
         r"""
         class_weights (:obj:`torch.FloatTensor` of shape :obj:`(tabular_config.num_labels,)`, `optional`, defaults to :obj:`None`):
@@ -274,19 +274,19 @@ class DistilBertWithTabular(DistilBertForSequenceClassification):
                                           hidden_channels=dims,
                                           bn=True)
 
-    @add_start_docstrings_to_callable(DISTILBERT_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
+    @add_start_docstrings_to_model_forward(DISTILBERT_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        class_weights=None,
-        cat_feats=None,
-        numerical_feats=None
+            self,
+            input_ids=None,
+            attention_mask=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            class_weights=None,
+            cat_feats=None,
+            numerical_feats=None
     ):
         r"""
         class_weights (:obj:`torch.FloatTensor` of shape :obj:`(tabular_config.num_labels,)`,`optional`, defaults to :obj:`None`):
@@ -375,22 +375,22 @@ class AlbertWithTabular(AlbertForSequenceClassification):
                                           hidden_channels=dims,
                                           bn=True)
 
-    @add_start_docstrings_to_callable(ALBERT_INPUTS_DOCSTRING)
+    @add_start_docstrings_to_model_forward(ALBERT_INPUTS_DOCSTRING)
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
-        class_weights=None,
-        cat_feats=None,
-        numerical_feats=None
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            return_dict=None,
+            class_weights=None,
+            cat_feats=None,
+            numerical_feats=None
     ):
         r"""
         labels (:obj:`torch.LongTensor` of shape :obj:`(batch_size,)`, `optional`, defaults to :obj:`None`):
@@ -465,26 +465,26 @@ class XLNetWithTabular(XLNetForSequenceClassification):
                                           hidden_channels=dims,
                                           bn=True)
 
-    @add_start_docstrings_to_callable(XLNET_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
+    @add_start_docstrings_to_model_forward(XLNET_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        mems=None,
-        perm_mask=None,
-        target_mapping=None,
-        token_type_ids=None,
-        input_mask=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        use_cache=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
-        class_weights=None,
-        cat_feats=None,
-        numerical_feats=None
+            self,
+            input_ids=None,
+            attention_mask=None,
+            mems=None,
+            perm_mask=None,
+            target_mapping=None,
+            token_type_ids=None,
+            input_mask=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            use_cache=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            return_dict=None,
+            class_weights=None,
+            cat_feats=None,
+            numerical_feats=None
     ):
         r"""
         labels (:obj:`torch.LongTensor` of shape :obj:`(batch_size,)`, `optional`, defaults to :obj:`None`)
@@ -563,7 +563,7 @@ class XLMWithTabular(XLMForSequenceClassification):
                                           hidden_channels=dims,
                                           bn=True)
 
-    @ add_start_docstrings_to_callable(XLM_INPUTS_DOCSTRING)
+    @ add_start_docstrings_to_model_forward(XLM_INPUTS_DOCSTRING)
     def forward(
             self,
             input_ids=None,

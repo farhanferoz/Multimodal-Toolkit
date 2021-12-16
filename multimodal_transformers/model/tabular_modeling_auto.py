@@ -1,16 +1,14 @@
 from collections import OrderedDict
 
 from transformers.configuration_utils import PretrainedConfig
-from transformers.configuration_auto import (
-    AutoConfig,
-    AlbertConfig,
-    BertConfig,
-    DistilBertConfig,
-    RobertaConfig,
-    XLNetConfig,
-    XLMConfig,
-    XLMRobertaConfig
-)
+from transformers.models.albert import AlbertConfig
+from transformers.models.bert import BertConfig
+from transformers.models.distilbert import DistilBertConfig
+from transformers.models.roberta import RobertaConfig
+from transformers.models.xlnet import XLNetConfig
+from transformers.models.xlm import XLMConfig
+from transformers.models.xlm_roberta import XLMRobertaConfig
+from transformers.models.auto import AutoConfig
 
 from .tabular_transformers import (
     RobertaWithTabular,
