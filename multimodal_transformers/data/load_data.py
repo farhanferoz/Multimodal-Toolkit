@@ -2,7 +2,7 @@ from functools import partial
 import logging
 from os.path import join, exists
 from typing import List
-from copy import deepcopy
+import transformers
 import pandas as pd
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer
