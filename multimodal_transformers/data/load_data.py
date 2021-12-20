@@ -296,31 +296,21 @@ def split_dataset(dataset: TorchTabularTextDataset, split_points: List[int]) -> 
         if start == end:
             new_dataset = None
         else:
-            df = dataset.df[start: end]
-
-            encodings = deepcopy(dataset.encodings)
-            encodings.data["input_ids"] = encodings.data["input_ids"][start: end]
-            encodings.data["token_type_ids"] = encodings.data["token_type_ids"][start: end]
-            encodings.data["attention_mask"] = encodings.data["attention_mask"][start: end]
-
-            cat_feats = dataset.cat_feats[start: end, :]
-
-            numerical_feats = None if dataset.numerical_feats is None else dataset.numerical_feats[start: end, :]
-
-            class_weights = dataset.class_weights
-
-            labels_list = dataset.label_list
-
-            labels = dataset.labels[start: end]
+            data = {
+                "input_ids": dataset.encodings.data["input_ids"][start:end],
+                "token_type_ids": dataset.encodings.data["token_type_ids"][start:end],
+                "attention_mask": dataset.encodings.data["attention_mask"][start:end],
+            }
+            encodings = transformers.BatchEncoding(data=data, encoding=dataset.encodings.encodings[start:end], n_sequences=dataset.encodings.n_sequences)
 
             new_dataset = TorchTabularTextDataset(
                 encodings=encodings,
-                categorical_feats=cat_feats,
-                numerical_feats=numerical_feats,
-                labels=labels,
-                df=df,
-                label_list=labels_list,
-                class_weights=class_weights
+                categorical_feats=dataset.cat_feats[start:end, :],
+                numerical_feats=None if dataset.numerical_feats is None else dataset.numerical_feats[start:end, :],
+                labels=dataset.labels[start:end],
+                df=dataset.df[start:end],
+                label_list=dataset.label_list,
+                class_weights=dataset.class_weights,
             )
         dataset_list.append(new_dataset)
         start = end
