@@ -306,6 +306,7 @@ def load_train_val_test_helper(
         )
         if i == 0:
             max_token_length = len(final_datasets[0].encodings.encodings[0].tokens)
+            logger.info(f"max_token_length in train data-set: {max_token_length}")
     return final_datasets[0], final_datasets[1], final_datasets[2]
 
 
