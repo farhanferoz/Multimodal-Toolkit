@@ -225,7 +225,7 @@ def load_train_val_test_helper(train_df,
                                replace_empty_text=None,
                                max_token_length=None,
                                debug=False):
-    if categorical_encode_type == 'ohe' or categorical_encode_type == 'binary':
+    if (len(categorical_cols) > 0) and (categorical_encode_type == "ohe" or categorical_encode_type == "binary"):
         dfs = [df for df in [train_df, val_df, test_df] if df is not None]
         data_df = pd.concat(dfs, axis=0)
         cat_feat_processor = CategoricalFeatures(data_df, categorical_cols, categorical_encode_type)
@@ -305,7 +305,7 @@ def split_dataset(dataset: TorchTabularTextDataset, split_points: List[int]) -> 
 
             new_dataset = TorchTabularTextDataset(
                 encodings=encodings,
-                categorical_feats=dataset.cat_feats[start:end, :],
+                categorical_feats=None if dataset.cat_feats is None else dataset.cat_feats[start:end, :],
                 numerical_feats=None if dataset.numerical_feats is None else dataset.numerical_feats[start:end, :],
                 labels=dataset.labels[start:end],
                 df=dataset.df[start:end],
