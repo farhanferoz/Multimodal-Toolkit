@@ -102,7 +102,7 @@ def load_data_into_folds(
         train_df = folds_df.copy().iloc[train_index]
         test_df = folds_df.copy().iloc[test_index]
 
-        train, val, test = load_train_val_test_helper(
+        train, val, test, _, _ = load_train_val_test_helper(
             train_df,
             val_df.copy(),
             test_df,
@@ -261,6 +261,7 @@ def load_train_val_test_helper(
     max_token_length=None,
     debug=False,
 ):
+    assert (train_df is not None) and (len(train_df) > 0)
     if (len(categorical_cols) > 0) and (categorical_encode_type == "ohe" or categorical_encode_type == "binary"):
         train_df, new_categorical_cols = transform_categorical_features(train_df, categorical_cols, categorical_encode_type)
         val_df, _ = transform_categorical_features(val_df, categorical_cols, categorical_encode_type)
@@ -288,26 +289,25 @@ def load_train_val_test_helper(
     datasets = [train_df, val_df, test_df]
     final_datasets = [None for _ in range(len(datasets))]
     for i in range(len(datasets)):
-        final_datasets[i] = load_data(
-            datasets[i],
-            text_cols,
-            tokenizer,
-            label_col,
-            label_list,
-            categorical_cols,
-            numerical_cols,
-            sep_text_token_str,
-            categorical_encode_type,
-            numerical_transformer,
-            empty_text_values,
-            replace_empty_text,
-            max_token_length,
-            debug,
-        )
-        if i == 0:
-            max_token_length = len(final_datasets[0].encodings.encodings[0].tokens)
-            logger.info(f"max_token_length in train data-set: {max_token_length}")
-    return final_datasets[0], final_datasets[1], final_datasets[2]
+        df = datasets[i]
+        if (df is not None) and (len(df) > 0):
+            final_datasets[i] = load_data(
+                df,
+                text_cols,
+                tokenizer,
+                label_col,
+                label_list,
+                categorical_cols,
+                numerical_cols,
+                sep_text_token_str,
+                categorical_encode_type,
+                numerical_transformer,
+                empty_text_values,
+                replace_empty_text,
+                max_token_length,
+                debug,
+                )
+    return final_datasets[0], final_datasets[1], final_datasets[2], categorical_cols, numerical_transformer
 
 
 def split_dataset(dataset: TorchTabularTextDataset, split_points: List[int]) -> List[TorchTabularTextDataset]:
@@ -354,7 +354,7 @@ def load_data(
     replace_empty_text=None,
     max_token_length=None,
     debug=False,
-):
+) -> TorchTabularTextDataset:
     """Function to load a single dataset given a pandas DataFrame
 
     Given a DataFrame, this function loads the data to a :obj:`torch_dataset.TorchTextDataset`

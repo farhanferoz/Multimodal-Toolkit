@@ -70,7 +70,7 @@ def main():
     )
 
     if not data_args.create_folds:
-        train_dataset, val_dataset, test_dataset = load_data_from_folder(
+        train_dataset, val_dataset, test_dataset, _, _ = load_data_from_folder(
             data_args.data_path,
             data_args.column_info['text_cols'],
             tokenizer,
